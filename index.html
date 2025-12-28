@@ -4,361 +4,308 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
     <title>The Age of Decentralized Intelligence</title>
-    <meta name="description" content="Essay reader + download. Unofficial community page." />
+    <meta name="description" content="Read online or download the PDF." />
     <style>
         :root {
-            --border: #e9e9e9;
             --bg: #ffffff;
+            --text: #111;
             --muted: #555;
+            --border: #e9e9e9;
+            --shadow: 0 10px 30px rgba(0,0,0,.12);
         }
 
         * {
             box-sizing: border-box;
         }
 
+        html, body {
+            height: 100%;
+        }
+
         body {
             margin: 0;
             font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
             background: var(--bg);
-            color: #111;
+            color: var(--text);
+            overflow: hidden; /* keep the viewer clean */
         }
 
-        a {
-            color: inherit;
-        }
-
-        header {
-            padding: 18px 16px;
-            border-bottom: 1px solid var(--border);
-            position: sticky;
-            top: 0;
-            background: rgba(255,255,255,.92);
-            backdrop-filter: blur(10px);
-            z-index: 10;
-        }
-
-        .title {
-            display: flex;
-            gap: 10px;
-            align-items: baseline;
-            flex-wrap: wrap;
-        }
-
-        h1 {
-            margin: 0;
-            font-size: 18px;
-            letter-spacing: .2px;
-        }
-
-        .meta {
-            margin: 6px 0 0;
-            color: var(--muted);
-            font-size: 13px;
-        }
-
-        .bar {
-            margin-top: 12px;
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-
-        .btn {
-            display: inline-flex;
-            gap: 8px;
-            align-items: center;
-            padding: 10px 12px;
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            text-decoration: none;
-            background: #fff;
-        }
-
-            .btn:active {
-                transform: translateY(1px);
-            }
-
-        .wrap {
-            display: grid;
-            grid-template-columns: 340px 1fr;
-            height: calc(100vh - 116px);
-        }
-
-        nav {
-            border-right: 1px solid var(--border);
-            padding: 12px;
-            overflow: auto;
-        }
-
-        .toc-title {
-            font-size: 12px;
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: .08em;
-            margin: 6px 6px 10px;
-        }
-
-        .toc a {
-            display: block;
-            padding: 10px 10px;
-            border-radius: 12px;
-            text-decoration: none;
-            border: 1px solid transparent;
-        }
-
-            .toc a:hover {
-                background: #f7f7f7;
-                border-color: #f0f0f0;
-            }
-
-        main {
-            height: 100%;
-        }
-
+        /* Fullscreen viewer */
         iframe {
+            position: fixed;
+            inset: 0;
             width: 100%;
             height: 100%;
             border: 0;
             background: #fff;
         }
 
-        /* Mobile: TOC becomes a drawer */
-        .mobile-toggle {
-            display: none;
+        /* Floating top bar */
+        .topbar {
+            position: fixed;
+            left: 12px;
+            right: 12px;
+            top: 12px;
+            z-index: 50;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            border: 1px solid rgba(233,233,233,.9);
+            border-radius: 14px;
+            background: rgba(255,255,255,.90);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow);
         }
 
+        .title {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            min-width: 0;
+        }
+
+            .title strong {
+                font-size: 13px;
+                letter-spacing: .2px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: 52vw;
+            }
+
+            .title span {
+                font-size: 12px;
+                color: var(--muted);
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: 52vw;
+            }
+
+        .actions {
+            display: inline-flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 10px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: #fff;
+            text-decoration: none;
+            color: var(--text);
+            font-size: 13px;
+            user-select: none;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+            .btn:active {
+                transform: translateY(1px);
+            }
+
+        /* Drawer */
         .drawer {
-            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 60;
+            background: rgba(0,0,0,.35);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .15s ease;
         }
 
-        @media (max-width: 900px) {
-            .wrap {
-                grid-template-columns: 1fr;
+            .drawer.open {
+                opacity: 1;
+                pointer-events: auto;
             }
 
-            nav {
-                display: none;
+        .panel {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: min(92vw, 420px);
+            background: #fff;
+            border-right: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            padding: 12px;
+            transform: translateX(-6px);
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 6px 4px 10px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 10px;
+        }
+
+            .panel-header strong {
+                font-size: 14px;
             }
 
-            .mobile-toggle {
-                display: inline-flex;
-            }
+        .toc {
+            overflow: auto;
+            height: calc(100% - 58px);
+            padding-right: 6px;
+        }
 
-            .drawer {
+            .toc a {
                 display: block;
-                position: fixed;
-                inset: 0;
-                background: rgba(0,0,0,.35);
-                z-index: 20;
-                opacity: 0;
-                pointer-events: none;
-                transition: opacity .15s ease;
+                padding: 10px 10px;
+                border-radius: 12px;
+                text-decoration: none;
+                border: 1px solid transparent;
+                color: var(--text);
             }
 
-                .drawer.open {
-                    opacity: 1;
-                    pointer-events: auto;
+                .toc a:hover {
+                    background: #f7f7f7;
+                    border-color: #f0f0f0;
                 }
 
-            .panel {
-                position: absolute;
-                left: 0;
-                top: 0;
-                bottom: 0;
-                width: min(92vw, 420px);
-                background: #fff;
-                border-right: 1px solid var(--border);
-                padding: 12px;
-                transform: translateX(-8px);
+        /* Make room for topbar on very small screens */
+        @media (max-width: 420px) {
+            .title strong, .title span {
+                max-width: 44vw;
             }
 
-                .panel header {
-                    position: static;
-                    border: 0;
-                    padding: 6px 4px 12px;
-                    background: transparent;
-                    backdrop-filter: none;
-                }
-
-                .panel h2 {
-                    margin: 0 0 6px;
-                    font-size: 14px;
-                }
-
-                .panel .close {
-                    float: right;
-                }
-
-            main {
-                height: calc(100vh - 116px);
+            .btn {
+                padding: 9px 9px;
             }
         }
     </style>
 </head>
-
 <body>
-    <header>
+
+    <iframe id="reader" title="Essay reader"></iframe>
+
+    <div class="topbar">
         <div class="title">
-            <h1>The Age of Decentralized Intelligence</h1>
+            <strong>The Age of Decentralized Intelligence</strong>
+            <span>Unofficial community page • Read online or download</span>
         </div>
-        <div class="meta">
-            Unofficial community page • PDF reader + download • File size: ~20 MB
+        <div class="actions">
+            <a class="btn" id="contentsBtn" href="#">Contents</a>
+            <a class="btn" id="openReader" href="#" target="_blank" rel="noopener">Open</a>
+            <a class="btn" id="downloadPdf" href="#" download="the-age-of-decentralized-intelligence.pdf">Download</a>
         </div>
-        <div class="bar">
-            <a class="btn" id="openReader" href="#" target="_blank" rel="noopener">Open reader (new tab)</a>
-            <a class="btn" id="downloadPdf" href="#" download>Download PDF</a>
-            <a class="btn mobile-toggle" id="openToc" href="#">Contents</a>
-        </div>
-    </header>
-
-    <div class="wrap">
-        <nav>
-            <div class="toc-title">Contents</div>
-            <div class="toc" id="tocDesktop">Loading…</div>
-        </nav>
-
-        <main>
-            <iframe id="reader" loading="lazy" title="Essay reader"></iframe>
-        </main>
     </div>
 
-    <!-- Mobile TOC Drawer -->
     <div class="drawer" id="drawer">
-        <div class="panel">
-            <header>
-                <a class="btn close" id="closeToc" href="#">Close</a>
-                <h2>Contents</h2>
-                <div style="color:var(--muted); font-size:12px; margin-top:6px;">
-                    Tap a chapter to jump.
-                </div>
-            </header>
-            <div class="toc" id="tocMobile">Loading…</div>
+        <div class="panel" role="dialog" aria-modal="true" aria-label="Contents">
+            <div class="panel-header">
+                <strong>Contents</strong>
+                <a class="btn" id="closeBtn" href="#">Close</a>
+            </div>
+            <div class="toc" id="toc">Loading…</div>
         </div>
     </div>
 
     <script>
-    // Works for both:
-    // - https://username.github.io/
-    // - https://username.github.io/repo/
-    const baseUrl = new URL("./", window.location.href);         // ends with trailing slash
+        // Works for both:
+        // - https://mdc91.github.io/
+        // - https://mdc91.github.io/<repo>/
+        const baseUrl = new URL("./", window.location.href);
 
-    // Keep the PDF name simple (recommended): "essay.pdf" in repo root
-    const pdfUrl  = new URL("essay.pdf", baseUrl).href;
+        // PDF filename (rename your file in the repo to match this)
+        const pdfFileName = "the-age-of-decentralized-intelligence.pdf";
+        const pdfUrl = new URL(pdfFileName, baseUrl).href;
 
-    // PDF.js viewer shipped in /pdfjs/web/viewer.html
-    const viewerUrlBase = new URL("pdfjs/web/viewer.html", baseUrl).href;
+        // PDF.js viewer path
+        const viewerUrlBase = new URL("pdfjs/web/viewer.html", baseUrl).href;
 
-    const iframe = document.getElementById("reader");
-    const openReaderBtn = document.getElementById("openReader");
-    const downloadBtn = document.getElementById("downloadPdf");
+        const iframe = document.getElementById("reader");
+        const openReaderBtn = document.getElementById("openReader");
+        const downloadBtn = document.getElementById("downloadPdf");
 
-    downloadBtn.href = pdfUrl;
+        downloadBtn.href = pdfUrl;
 
-    let TOC = []; // loaded from toc.json
+        let TOC = [];
 
-    function viewerUrlForPage(page) {
-      return viewerUrlBase
-        + "?file=" + encodeURIComponent(pdfUrl)
-        + "#page=" + page
-        + "&zoom=page-width";
-    }
-
-    function openPage(page) {
-      iframe.src = viewerUrlForPage(page);
-      openReaderBtn.href = viewerUrlForPage(page);
-    }
-
-    function setHash(params) {
-      const sp = new URLSearchParams(params);
-      window.location.hash = sp.toString(); // e.g. #chapter=ch1
-    }
-
-    function findChapterById(id) {
-      return TOC.find(x => String(x.id).toLowerCase() === String(id).toLowerCase());
-    }
-
-    function findChapterByTitleLoose(title) {
-      const t = decodeURIComponent(title).trim().toLowerCase();
-      return TOC.find(x => String(x.title).trim().toLowerCase() === t);
-    }
-
-    function resolveFromHash() {
-      const raw = (window.location.hash || "").replace(/^#/, "");
-      const sp = new URLSearchParams(raw);
-
-      const chapter = sp.get("chapter");
-      const pageStr = sp.get("page");
-
-      if (chapter) {
-        const hit = findChapterById(chapter) || findChapterByTitleLoose(chapter);
-        if (hit && hit.page) {
-          openPage(Number(hit.page));
-          return;
+        function viewerUrlForPage(page) {
+            return viewerUrlBase
+                + "?file=" + encodeURIComponent(pdfUrl)
+                + "#page=" + page
+                + "&zoom=page-width";
         }
-        openPage(1);
-        return;
-      }
 
-      if (pageStr && /^\d+$/.test(pageStr)) {
-        openPage(Number(pageStr));
-        return;
-      }
+        function openPage(page) {
+            const url = viewerUrlForPage(page);
+            iframe.src = url;
+            openReaderBtn.href = url;
+        }
 
-      openPage(1);
-    }
+        function setHash(params) {
+            const sp = new URLSearchParams(params);
+            window.location.hash = sp.toString(); // #chapter=...
+        }
 
-    async function loadToc() {
-      TOC = await fetch(new URL("toc.json", baseUrl)).then(r => r.json());
+        function resolveFromHash() {
+            const raw = (window.location.hash || "").replace(/^#/, "");
+            const sp = new URLSearchParams(raw);
 
-      const desktop = document.getElementById("tocDesktop");
-      const mobile  = document.getElementById("tocMobile");
+            const chapter = sp.get("chapter");
+            const pageStr = sp.get("page");
 
-      function render(container, afterClick) {
-        container.innerHTML = "";
-        TOC.forEach(item => {
-          const a = document.createElement("a");
-          a.href = "#chapter=" + encodeURIComponent(item.id);
-          a.textContent = item.title;
-          a.addEventListener("click", (e) => {
-            e.preventDefault();
-            setHash({ chapter: item.id });
-            if (afterClick) afterClick();
-          });
-          container.appendChild(a);
-        });
-      }
+            if (chapter && TOC.length) {
+                const hit = TOC.find(x => String(x.id).toLowerCase() === String(chapter).toLowerCase());
+                if (hit?.page) return openPage(Number(hit.page));
+            }
 
-      render(desktop);
-      render(mobile, () => closeDrawer());
-    }
+            if (pageStr && /^\d+$/.test(pageStr)) return openPage(Number(pageStr));
 
-    // Mobile drawer
-    const drawer = document.getElementById("drawer");
-    const openToc = document.getElementById("openToc");
-    const closeToc = document.getElementById("closeToc");
+            // default
+            openPage(1);
+        }
 
-    function openDrawer(){ drawer.classList.add("open"); }
-    function closeDrawer(){ drawer.classList.remove("open"); }
+        // Drawer
+        const drawer = document.getElementById("drawer");
+        const contentsBtn = document.getElementById("contentsBtn");
+        const closeBtn = document.getElementById("closeBtn");
 
-    openToc?.addEventListener("click", (e) => { e.preventDefault(); openDrawer(); });
-    closeToc.addEventListener("click", (e) => { e.preventDefault(); closeDrawer(); });
-    drawer.addEventListener("click", (e) => { if (e.target === drawer) closeDrawer(); });
+        function openDrawer() { drawer.classList.add("open"); }
+        function closeDrawer() { drawer.classList.remove("open"); }
 
-    // Init
-    loadToc().catch(() => {
-      document.getElementById("tocDesktop").textContent = "Failed to load TOC.";
-      document.getElementById("tocMobile").textContent  = "Failed to load TOC.";
-    }).finally(() => {
-      // Open from deep link: #chapter=... or #page=...
-      resolveFromHash();
-    });
+        contentsBtn.addEventListener("click", (e) => { e.preventDefault(); openDrawer(); });
+        closeBtn.addEventListener("click", (e) => { e.preventDefault(); closeDrawer(); });
+        drawer.addEventListener("click", (e) => { if (e.target === drawer) closeDrawer(); });
 
-    window.addEventListener("hashchange", resolveFromHash);
+        async function loadToc() {
+            TOC = await fetch(new URL("toc.json", baseUrl)).then(r => r.json());
+            const tocEl = document.getElementById("toc");
+            tocEl.innerHTML = "";
 
-    // Provide a default "Open reader" target (page 1)
-    openReaderBtn.href = viewerUrlForPage(1);
+            TOC.forEach(item => {
+                const a = document.createElement("a");
+                a.href = "#chapter=" + encodeURIComponent(item.id);
+                a.textContent = item.title;
+                a.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    setHash({ chapter: item.id });
+                    closeDrawer();
+                });
+                tocEl.appendChild(a);
+            });
+        }
+
+        loadToc()
+            .catch(() => { document.getElementById("toc").textContent = "Failed to load TOC."; })
+            .finally(() => { resolveFromHash(); });
+
+        window.addEventListener("hashchange", resolveFromHash);
+
+        // Set a sane default for the "Open" button
+        openReaderBtn.href = viewerUrlForPage(1);
     </script>
 </body>
-</html>
-
