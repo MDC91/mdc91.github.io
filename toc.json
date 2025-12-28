@@ -1,0 +1,47 @@
+[
+    {
+        "id": "prologue",
+        "title": "Prologue",
+        "page": 3
+    },
+    {
+        "id": "the-cracks-in-the-old-order",
+        "title": "The Cracks in the Old Order",
+        "page": 5
+    },
+    {
+        "id": "the-liquidity-trap",
+        "title": "The Liquidity Trap",
+        "page": 10
+    },
+    {
+        "id": "the-end-of-trust",
+        "title": "The End of Trust",
+        "page": 14
+    },
+    {
+        "id": "the-great-rotation",
+        "title": "The Great Rotation",
+        "page": 19
+    },
+    {
+        "id": "the-digital-gold-rush",
+        "title": "The Digital Gold Rush",
+        "page": 24
+    },
+    {
+        "id": "the-new-architecture-of-value",
+        "title": "The New Architecture of Value",
+        "page": 29
+    },
+    {
+        "id": "the-rise-of-the-machine-commons",
+        "title": "The Rise of the Machine Commons",
+        "page": 34
+    },
+    {
+        "id": "the-civilizational-transition",
+        "title": "The Civilizational Transition",
+        "page": 40
+    }
+]
