@@ -517,5 +517,20 @@
         // Default for "open in new tab"
         openNewTab.href = viewerUrlForPage(1);
     </script>
+    <script>
+        document.addEventListener("webviewerloaded", () => {
+            const app = window.PDFViewerApplication;
+            if (!app?.eventBus) return;
+
+            app.eventBus.on("pagechanging", (evt) => {
+                try {
+                    window.parent.postMessage(
+                        { type: "pdfjs-page", page: evt.pageNumber },
+                        window.location.origin
+                    );
+                } catch (e) { }
+            });
+        });
+    </script>
 </body>
 </html>
