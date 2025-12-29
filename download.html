@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Downloading…</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0
+        }
+
+        body {
+            display: grid;
+            place-items: center;
+            background: #0b0c0f;
+            color: #e9e9ee;
+            font-family: system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+            padding: 24px;
+            text-align: center
+        }
+
+        a {
+            color: #e9e9ee;
+            text-decoration: none;
+            border-bottom: 1px solid rgba(233,233,238,.35)
+        }
+
+            a:hover {
+                border-bottom-color: rgba(233,233,238,.7)
+            }
+
+        .muted {
+            color: rgba(233,233,238,.6);
+            font-size: 13px;
+            max-width: 520px
+        }
+    </style>
+</head>
+<body>
+    <div class="muted">
+        If your download doesn’t start, <a id="link" href="#">click here</a>.
+    </div>
+
+    <script data-goatcounter="https://mdc91.goatcounter.com/count"
+            async src="//gc.zgo.at/count.js"></script>
+    <script>
+        const pdfUrl = "https://mdc91.github.io/the-age-of-decentralized-intelligence.pdf";
+        document.getElementById("link").href = pdfUrl;
+        setTimeout(() => { window.location.replace(pdfUrl); }, 500);
+    </script>
+</body>
+</html>

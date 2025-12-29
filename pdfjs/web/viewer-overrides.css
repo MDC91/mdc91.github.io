@@ -1,0 +1,27 @@
+/* Hide PDF.js UI completely */
+#outerContainer #sidebarContainer,
+#outerContainer #toolbarContainer,
+#outerContainer #secondaryToolbar,
+#outerContainer #findbar,
+#outerContainer #editorModeButtons,
+#outerContainer #toolbarViewer,
+#outerContainer #toolbarViewerLeft,
+#outerContainer #toolbarViewerRight,
+#outerContainer #toolbarViewerMiddle,
+#outerContainer #viewerToolbar,
+#outerContainer #loadingBar {
+    display: none !important;
+}
+
+/* Let the PDF fill the whole iframe */
+#viewerContainer {
+    top: 0 !important;
+    bottom: 0 !important;
+}
+
+/* Remove page margins/borders for a “book” feel */
+.pdfViewer .page {
+    margin: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}

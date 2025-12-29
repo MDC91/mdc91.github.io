@@ -9,14 +9,12 @@
         :root {
             --bg: #0b0c0f;
             --panel: rgba(18, 20, 26, .86);
-            --panelSolid: #12141a;
             --text: #e9e9ee;
             --muted: rgba(233,233,238,.65);
             --border: rgba(255,255,255,.10);
             --border2: rgba(255,255,255,.14);
             --shadow: 0 18px 60px rgba(0,0,0,.55);
             --radius: 16px;
-            --radius2: 14px;
             --btn: rgba(255,255,255,.06);
             --btnHover: rgba(255,255,255,.10);
             --focus: rgba(255,255,255,.22);
@@ -38,17 +36,17 @@
             overflow: hidden;
         }
 
-        /* Fullscreen viewer */
+        /* Fullscreen PDF.js viewer */
         iframe {
             position: fixed;
             inset: 0;
             width: 100%;
             height: 100%;
             border: 0;
-            background: #000; /* behind the viewer */
+            background: #000;
         }
 
-        /* Minimal hamburger button */
+        /* Minimal hamburger button (top-left) */
         .menu-btn {
             position: fixed;
             top: 14px;
@@ -261,7 +259,7 @@
             }
 
         .toc {
-            max-height: calc(100vh - 260px);
+            max-height: calc(100vh - 310px);
             overflow: auto;
             padding: 6px;
         }
@@ -285,7 +283,6 @@
                     border-color: var(--focus);
                 }
 
-        /* Small devices: keep button reachable */
         @media (max-width: 420px) {
             .menu-btn {
                 top: 10px;
@@ -328,10 +325,14 @@
             </div>
 
             <div class="actions">
-                <a class="action" id="downloadLink" href="#" download="the-age-of-decentralized-intelligence.pdf">
+                <!-- Download via redirect page (counts PDF opens as /download.html pageviews) -->
+                <a class="action"
+                   id="downloadLink"
+                   href="download.html"
+                   data-goatcounter-click="download-click">
                     <div>
                         <div><strong>Download PDF</strong></div>
-                        <small>Original file</small>
+                        <small>Tracks as /download.html</small>
                     </div>
                     <div class="right">↘</div>
                 </a>
@@ -342,6 +343,14 @@
                         <small>In a new tab</small>
                     </div>
                     <div class="right">↗</div>
+                </a>
+
+                <a class="action" id="resumeBtn" href="#" data-goatcounter-click="resume-reading">
+                    <div>
+                        <div><strong>Resume reading</strong></div>
+                        <small id="resumeHint">From your last page</small>
+                    </div>
+                    <div class="right">↩</div>
                 </a>
             </div>
 
@@ -355,24 +364,26 @@
         </div>
     </div>
 
+    <!-- GoatCounter -->
+    <script data-goatcounter="https://mdc91.goatcounter.com/count"
+            async src="//gc.zgo.at/count.js"></script>
+
     <script>
-        // Works for both:
-        // - https://username.github.io/
-        // - https://username.github.io/<repo>/
         const baseUrl = new URL("./", window.location.href);
 
-        // Ensure your PDF in repo root matches this name:
-        const pdfFileName = "the-age-of-decentralized-intelligence.pdf";
-        const pdfUrl = new URL(pdfFileName, baseUrl).href;
+        // PDF lives at root (as you shared)
+        const pdfUrl = "https://mdc91.github.io/the-age-of-decentralized-intelligence.pdf";
 
-        // PDF.js viewer path (repo must contain pdfjs/web/viewer.html)
+        // PDF.js viewer path
         const viewerUrlBase = new URL("pdfjs/web/viewer.html", baseUrl).href;
 
-        const iframe = document.getElementById("reader");
-        const downloadLink = document.getElementById("downloadLink");
-        const openNewTab = document.getElementById("openNewTab");
+        // Last-read storage key
+        const STORAGE_KEY = "adi_last_page_v1";
 
-        downloadLink.href = pdfUrl;
+        const iframe = document.getElementById("reader");
+        const openNewTab = document.getElementById("openNewTab");
+        const resumeBtn = document.getElementById("resumeBtn");
+        const resumeHint = document.getElementById("resumeHint");
 
         let TOC = [];
 
@@ -384,14 +395,33 @@
         }
 
         function openPage(page) {
-            const url = viewerUrlForPage(page);
+            const safe = Number.isFinite(page) && page > 0 ? page : 1;
+            const url = viewerUrlForPage(safe);
             iframe.src = url;
             openNewTab.href = url;
         }
 
         function setHash(params) {
             const sp = new URLSearchParams(params);
-            window.location.hash = sp.toString(); // e.g. #chapter=prologue
+            window.location.hash = sp.toString(); // #chapter=... or #page=...
+        }
+
+        function getLastPage() {
+            const n = Number(localStorage.getItem(STORAGE_KEY) || "0");
+            return Number.isFinite(n) && n > 0 ? n : 0;
+        }
+
+        function updateResumeUi() {
+            const last = getLastPage();
+            if (last > 0) {
+                resumeHint.textContent = "Last page: " + last;
+                resumeBtn.style.opacity = "1";
+                resumeBtn.style.pointerEvents = "auto";
+            } else {
+                resumeHint.textContent = "No saved position yet";
+                resumeBtn.style.opacity = ".6";
+                resumeBtn.style.pointerEvents = "none";
+            }
         }
 
         function resolveFromHash() {
@@ -408,7 +438,9 @@
 
             if (pageStr && /^\d+$/.test(pageStr)) return openPage(Number(pageStr));
 
-            openPage(1);
+            // No deep link => resume if possible
+            const last = getLastPage();
+            openPage(last > 0 ? last : 1);
         }
 
         // Drawer UI
@@ -419,6 +451,7 @@
         function openMenu() {
             overlay.classList.add("open");
             overlay.setAttribute("aria-hidden", "false");
+            updateResumeUi();
         }
         function closeMenu() {
             overlay.classList.remove("open");
@@ -434,6 +467,23 @@
 
         window.addEventListener("keydown", (e) => {
             if (e.key === "Escape") closeMenu();
+        });
+
+        resumeBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            const last = getLastPage();
+            if (last > 0) {
+                setHash({ page: String(last) });
+                closeMenu();
+            }
+        });
+
+        // Receive page updates from PDF.js viewer (from viewer.html postMessage)
+        window.addEventListener("message", (ev) => {
+            if (ev.origin !== window.location.origin) return;
+            if (ev.data?.type === "pdfjs-page" && Number.isFinite(ev.data.page)) {
+                localStorage.setItem(STORAGE_KEY, String(ev.data.page));
+            }
         });
 
         // Load TOC
@@ -457,7 +507,10 @@
 
         loadToc()
             .catch(() => { document.getElementById("toc").textContent = "Failed to load TOC."; })
-            .finally(() => { resolveFromHash(); });
+            .finally(() => {
+                updateResumeUi();
+                resolveFromHash();
+            });
 
         window.addEventListener("hashchange", resolveFromHash);
 
