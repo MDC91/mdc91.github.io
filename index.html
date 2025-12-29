@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
     <title>The Age of Decentralized Intelligence</title>
     <meta name="description" content="Read online or download the PDF." />
+    <link rel="icon" href="data:," />
     <style>
         :root {
             --bg: #0b0c0f;
@@ -36,7 +37,6 @@
             overflow: hidden;
         }
 
-        /* Fullscreen PDF.js viewer */
         iframe {
             position: fixed;
             inset: 0;
@@ -46,7 +46,6 @@
             background: #000;
         }
 
-        /* Minimal hamburger button (top-left) */
         .menu-btn {
             position: fixed;
             top: 14px;
@@ -85,8 +84,8 @@
                 left: 0;
                 right: 0;
                 height: 2px;
-                background: rgba(233,233,238,.88);
                 border-radius: 2px;
+                background: rgba(233,233,238,.88);
             }
 
                 .menu-icon span:nth-child(1) {
@@ -103,7 +102,6 @@
                     opacity: .75;
                 }
 
-        /* Drawer overlay */
         .overlay {
             position: fixed;
             inset: 0;
@@ -119,7 +117,6 @@
                 pointer-events: auto;
             }
 
-        /* Drawer panel */
         .drawer {
             position: absolute;
             top: 0;
@@ -194,7 +191,6 @@
             transform: translateY(-1px);
         }
 
-        /* Actions */
         .actions {
             display: grid;
             grid-template-columns: 1fr;
@@ -233,7 +229,6 @@
                 white-space: nowrap;
             }
 
-        /* TOC */
         .toc-wrap {
             margin-top: 10px;
             border: 1px solid var(--border);
@@ -301,17 +296,14 @@
 </head>
 <body>
 
-    <!-- Fullscreen PDF.js viewer -->
     <iframe id="reader" title="Essay reader"></iframe>
 
-    <!-- Minimal menu button -->
     <button class="menu-btn" id="menuBtn" aria-label="Open menu" title="Menu">
         <div class="menu-icon" aria-hidden="true">
             <span></span><span></span><span></span>
         </div>
     </button>
 
-    <!-- Drawer overlay -->
     <div class="overlay" id="overlay" aria-hidden="true">
         <div class="drawer" role="dialog" aria-modal="true" aria-label="Menu">
             <div class="drawer-header">
@@ -325,7 +317,6 @@
             </div>
 
             <div class="actions">
-                <!-- Download via redirect page (counts PDF opens as /download.html pageviews) -->
                 <a class="action"
                    id="downloadLink"
                    href="download.html"
@@ -364,20 +355,15 @@
         </div>
     </div>
 
-    <!-- GoatCounter -->
     <script data-goatcounter="https://mdc91.goatcounter.com/count"
             async src="//gc.zgo.at/count.js"></script>
 
     <script>
-        const baseUrl = new URL("./", window.location.href);
-
-        // PDF lives at root (as you shared)
+        // IMPORTANT: keep PDF absolute (your real file)
         const pdfUrl = "https://mdc91.github.io/the-age-of-decentralized-intelligence.pdf";
 
-        // PDF.js viewer path
-        const viewerUrlBase = new URL("pdfjs/web/viewer.html", baseUrl).href;
-
-        // Last-read storage key
+        // IMPORTANT: force absolute viewer path + cache-bust param (so you don't keep loading an old cached viewer)
+        const VIEWER_VERSION = "2025-12-29";
         const STORAGE_KEY = "adi_last_page_v1";
 
         const iframe = document.getElementById("reader");
@@ -388,22 +374,24 @@
         let TOC = [];
 
         function viewerUrlForPage(page) {
-            return viewerUrlBase
-                + "?file=" + encodeURIComponent(pdfUrl)
-                + "#page=" + page
-                + "&zoom=page-width";
+            const safe = Number.isFinite(page) && page > 0 ? page : 1;
+
+            const u = new URL("/pdfjs/web/viewer.html", window.location.origin);
+            u.searchParams.set("v", VIEWER_VERSION);
+            u.searchParams.set("file", pdfUrl);
+            u.hash = `page=${safe}&zoom=page-width`;
+            return u.toString();
         }
 
         function openPage(page) {
-            const safe = Number.isFinite(page) && page > 0 ? page : 1;
-            const url = viewerUrlForPage(safe);
+            const url = viewerUrlForPage(page);
             iframe.src = url;
             openNewTab.href = url;
         }
 
         function setHash(params) {
             const sp = new URLSearchParams(params);
-            window.location.hash = sp.toString(); // #chapter=... or #page=...
+            window.location.hash = sp.toString();
         }
 
         function getLastPage() {
@@ -438,7 +426,6 @@
 
             if (pageStr && /^\d+$/.test(pageStr)) return openPage(Number(pageStr));
 
-            // No deep link => resume if possible
             const last = getLastPage();
             openPage(last > 0 ? last : 1);
         }
@@ -460,14 +447,8 @@
 
         menuBtn.addEventListener("click", () => openMenu());
         closeBtn.addEventListener("click", () => closeMenu());
-
-        overlay.addEventListener("click", (e) => {
-            if (e.target === overlay) closeMenu();
-        });
-
-        window.addEventListener("keydown", (e) => {
-            if (e.key === "Escape") closeMenu();
-        });
+        overlay.addEventListener("click", (e) => { if (e.target === overlay) closeMenu(); });
+        window.addEventListener("keydown", (e) => { if (e.key === "Escape") closeMenu(); });
 
         resumeBtn.addEventListener("click", (e) => {
             e.preventDefault();
@@ -478,7 +459,7 @@
             }
         });
 
-        // Receive page updates from PDF.js viewer (from viewer.html postMessage)
+        // Receive current page from pdfjs/web/viewer.html (your postMessage patch)
         window.addEventListener("message", (ev) => {
             if (ev.origin !== window.location.origin) return;
             if (ev.data?.type === "pdfjs-page" && Number.isFinite(ev.data.page)) {
@@ -486,9 +467,10 @@
             }
         });
 
-        // Load TOC
         async function loadToc() {
-            TOC = await fetch(new URL("toc.json", baseUrl)).then(r => r.json());
+            const toc = await fetch(new URL("toc.json", window.location.href)).then(r => r.json());
+            TOC = toc;
+
             const tocEl = document.getElementById("toc");
             tocEl.innerHTML = "";
 
@@ -513,24 +495,7 @@
             });
 
         window.addEventListener("hashchange", resolveFromHash);
-
-        // Default for "open in new tab"
         openNewTab.href = viewerUrlForPage(1);
-    </script>
-    <script>
-        document.addEventListener("webviewerloaded", () => {
-            const app = window.PDFViewerApplication;
-            if (!app?.eventBus) return;
-
-            app.eventBus.on("pagechanging", (evt) => {
-                try {
-                    window.parent.postMessage(
-                        { type: "pdfjs-page", page: evt.pageNumber },
-                        window.location.origin
-                    );
-                } catch (e) { }
-            });
-        });
     </script>
 </body>
 </html>
