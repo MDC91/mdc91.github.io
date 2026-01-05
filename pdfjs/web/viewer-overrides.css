@@ -19,37 +19,53 @@
     bottom: 0 !important;
 }
 
-/* ===== "Ebook" look: centered pages with comfortable margins ===== */
-:root {
-    --gutter: 24px;
-    --max-page-width: 980px; /* adjust: 860–1100 looks good */
-}
-
-/* Dark surround */
-html, body, #viewerContainer {
+/* ===== Premium dark "ebook" surround ===== */
+html, body {
     background: #0b0c0f !important;
 }
 
-/* Center the whole viewer column */
 #viewerContainer {
+    background: #0b0c0f !important;
     padding: 24px 16px !important;
 }
 
+/* ===== Center the column (THIS fixes left alignment) ===== */
 #viewer {
+    margin-left: auto !important;
+    margin-right: auto !important;
     max-width: 980px !important; /* adjust: 860–1100 */
-    margin: 0 auto !important;
 }
 
-/* Nice “book page” look */
-.pdfViewer .page {
-    margin: 18px auto !important;
-    border: 0 !important;
-    border-radius: 10px !important;
-    overflow: hidden !important;
-    box-shadow: 0 14px 50px rgba(0,0,0,.55) !important;
+/* Make sure the viewer itself doesn't stick to the left */
+.pdfViewer {
+    margin-left: auto !important;
+    margin-right: auto !important;
 }
 
-/* Mobile: use more width */
+    /* ===== Page styling ===== */
+    .pdfViewer .page {
+        margin: 18px auto !important;
+        border: 0 !important;
+        border-radius: 10px !important;
+        overflow: hidden !important;
+        background: #fff !important;
+        box-shadow: 0 14px 50px rgba(0,0,0,.55) !important;
+    }
+
+        /* Ensure canvas scales to page width */
+        .pdfViewer .page > .canvasWrapper > canvas {
+            width: 100% !important;
+            height: auto !important;
+        }
+
+        /* Text & annotations match width */
+        .pdfViewer .page .textLayer,
+        .pdfViewer .page .annotationLayer,
+        .pdfViewer .page .annotationLayer .annotationContent {
+            width: 100% !important;
+        }
+
+/* ===== Mobile: use more width, less padding ===== */
 @media (max-width: 640px) {
     #viewerContainer {
         padding: 10px 8px !important;
