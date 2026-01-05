@@ -25,58 +25,42 @@
     --max-page-width: 980px; /* adjust: 860–1100 looks good */
 }
 
-/* Dark surround like an e-reader */
-html, body {
+/* Dark surround */
+html, body, #viewerContainer {
     background: #0b0c0f !important;
 }
 
-/* Center the page column */
+/* Center the whole viewer column */
 #viewerContainer {
-    background: #0b0c0f !important;
-    padding-left: var(--gutter) !important;
-    padding-right: var(--gutter) !important;
+    padding: 24px 16px !important;
 }
 
-/* PDF.js renders pages inside .pdfViewer */
-.pdfViewer {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
+#viewer {
+    max-width: 980px !important; /* adjust: 860–1100 */
+    margin: 0 auto !important;
 }
 
-    /* Page styling: centered, max width, subtle spacing */
-    .pdfViewer .page {
-        width: min(var(--max-page-width), calc(100vw - (2 * var(--gutter)))) !important;
-        margin: 18px 0 !important;
-        border: 0 !important;
-        box-shadow: 0 14px 50px rgba(0,0,0,.55) !important;
-        background: #fff !important;
-        border-radius: 10px !important;
-        overflow: hidden !important;
-    }
+/* Nice “book page” look */
+.pdfViewer .page {
+    margin: 18px auto !important;
+    border: 0 !important;
+    border-radius: 10px !important;
+    overflow: hidden !important;
+    box-shadow: 0 14px 50px rgba(0,0,0,.55) !important;
+}
 
-        /* Make the actual canvas scale to the page wrapper width */
-        .pdfViewer .page > .canvasWrapper > canvas {
-            width: 100% !important;
-            height: auto !important;
-        }
-
-        /* Text layer and annotation layer should match width as well */
-        .pdfViewer .page .textLayer,
-        .pdfViewer .page .annotationLayer,
-        .pdfViewer .page .annotationLayer .annotationContent {
-            width: 100% !important;
-        }
-
-/* Mobile: use full width, less gutter */
+/* Mobile: use more width */
 @media (max-width: 640px) {
-    :root {
-        --gutter: 10px;
-        --max-page-width: 9999px;
+    #viewerContainer {
+        padding: 10px 8px !important;
+    }
+
+    #viewer {
+        max-width: none !important;
     }
 
     .pdfViewer .page {
-        margin: 10px 0 !important;
+        margin: 10px auto !important;
         border-radius: 8px !important;
     }
 }

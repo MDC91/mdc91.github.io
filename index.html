@@ -379,7 +379,7 @@
             const u = new URL("/pdfjs/web/viewer.html", window.location.origin);
             u.searchParams.set("v", VIEWER_VERSION);
             u.searchParams.set("file", pdfUrl);
-            u.hash = `page=${safe}&zoom=page-width`;
+            u.hash = `page=${safe}&zoom=auto`;
             return u.toString();
         }
 
