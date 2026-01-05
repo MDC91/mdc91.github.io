@@ -254,7 +254,7 @@
             }
 
         .toc {
-            max-height: calc(100vh - 310px);
+            max-height: calc(100vh - 240px);
             overflow: auto;
             padding: 6px;
         }
@@ -309,7 +309,7 @@
             <div class="drawer-header">
                 <div class="drawer-title">
                     <strong>The Age of Decentralized Intelligence</strong>
-                    <span>Read online or download</span>
+                    <span>Read online or download • Unofficial community page</span>
                 </div>
                 <button class="close-btn" id="closeBtn" aria-label="Close menu" title="Close">
                     <div class="close-x" aria-hidden="true">×</div>
@@ -323,24 +323,9 @@
                    data-goatcounter-click="download-click">
                     <div>
                         <div><strong>Download PDF</strong></div>
+                        <small>Tracks as /download.html</small>
                     </div>
                     <div class="right">↘</div>
-                </a>
-
-                <a class="action" id="openNewTab" href="#" target="_blank" rel="noopener">
-                    <div>
-                        <div><strong>Open reader</strong></div>
-                        <small>In a new tab</small>
-                    </div>
-                    <div class="right">↗</div>
-                </a>
-
-                <a class="action" id="resumeBtn" href="#" data-goatcounter-click="resume-reading">
-                    <div>
-                        <div><strong>Resume reading</strong></div>
-                        <small id="resumeHint">From your last page</small>
-                    </div>
-                    <div class="right">↩</div>
                 </a>
             </div>
 
@@ -354,28 +339,26 @@
         </div>
     </div>
 
+    <!-- GoatCounter -->
     <script data-goatcounter="https://mdc91.goatcounter.com/count"
             async src="//gc.zgo.at/count.js"></script>
 
     <script>
-        // IMPORTANT: keep PDF absolute (your real file)
-        const pdfUrl = "https://mdc91.github.io/the-age-of-decentralized-intelligence.pdf";
+        const SITE_ROOT = window.location.origin + "/";
 
-        // IMPORTANT: force absolute viewer path + cache-bust param (so you don't keep loading an old cached viewer)
+        const pdfUrl = SITE_ROOT + "the-age-of-decentralized-intelligence.pdf";
+        const viewerBase = SITE_ROOT + "pdfjs/web/viewer.html";
         const VIEWER_VERSION = "2025-12-29";
+
         const STORAGE_KEY = "adi_last_page_v1";
 
         const iframe = document.getElementById("reader");
-        const openNewTab = document.getElementById("openNewTab");
-        const resumeBtn = document.getElementById("resumeBtn");
-        const resumeHint = document.getElementById("resumeHint");
 
         let TOC = [];
 
         function viewerUrlForPage(page) {
             const safe = Number.isFinite(page) && page > 0 ? page : 1;
-
-            const u = new URL("/pdfjs/web/viewer.html", window.location.origin);
+            const u = new URL(viewerBase);
             u.searchParams.set("v", VIEWER_VERSION);
             u.searchParams.set("file", pdfUrl);
             u.hash = `page=${safe}&zoom=auto`;
@@ -383,9 +366,7 @@
         }
 
         function openPage(page) {
-            const url = viewerUrlForPage(page);
-            iframe.src = url;
-            openNewTab.href = url;
+            iframe.src = viewerUrlForPage(page);
         }
 
         function setHash(params) {
@@ -396,19 +377,6 @@
         function getLastPage() {
             const n = Number(localStorage.getItem(STORAGE_KEY) || "0");
             return Number.isFinite(n) && n > 0 ? n : 0;
-        }
-
-        function updateResumeUi() {
-            const last = getLastPage();
-            if (last > 0) {
-                resumeHint.textContent = "Last page: " + last;
-                resumeBtn.style.opacity = "1";
-                resumeBtn.style.pointerEvents = "auto";
-            } else {
-                resumeHint.textContent = "No saved position yet";
-                resumeBtn.style.opacity = ".6";
-                resumeBtn.style.pointerEvents = "none";
-            }
         }
 
         function resolveFromHash() {
@@ -437,7 +405,6 @@
         function openMenu() {
             overlay.classList.add("open");
             overlay.setAttribute("aria-hidden", "false");
-            updateResumeUi();
         }
         function closeMenu() {
             overlay.classList.remove("open");
@@ -449,16 +416,7 @@
         overlay.addEventListener("click", (e) => { if (e.target === overlay) closeMenu(); });
         window.addEventListener("keydown", (e) => { if (e.key === "Escape") closeMenu(); });
 
-        resumeBtn.addEventListener("click", (e) => {
-            e.preventDefault();
-            const last = getLastPage();
-            if (last > 0) {
-                setHash({ page: String(last) });
-                closeMenu();
-            }
-        });
-
-        // Receive current page from pdfjs/web/viewer.html (your postMessage patch)
+        // Last-read updates from pdfjs/web/viewer.html patch
         window.addEventListener("message", (ev) => {
             if (ev.origin !== window.location.origin) return;
             if (ev.data?.type === "pdfjs-page" && Number.isFinite(ev.data.page)) {
@@ -467,9 +425,7 @@
         });
 
         async function loadToc() {
-            const toc = await fetch(new URL("toc.json", window.location.href)).then(r => r.json());
-            TOC = toc;
-
+            TOC = await fetch(SITE_ROOT + "toc.json").then(r => r.json());
             const tocEl = document.getElementById("toc");
             tocEl.innerHTML = "";
 
@@ -488,13 +444,9 @@
 
         loadToc()
             .catch(() => { document.getElementById("toc").textContent = "Failed to load TOC."; })
-            .finally(() => {
-                updateResumeUi();
-                resolveFromHash();
-            });
+            .finally(() => { resolveFromHash(); });
 
         window.addEventListener("hashchange", resolveFromHash);
-        openNewTab.href = viewerUrlForPage(1);
     </script>
 </body>
 </html>
