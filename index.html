@@ -372,8 +372,22 @@
 
         let TOC = [];
 
+        function isIOSafari() {
+            const ua = navigator.userAgent;
+            const isIOS = /iPad|iPhone|iPod/.test(ua) || (ua.includes('Mac') && navigator.maxTouchPoints > 0);
+            const isSafari = /Safari/.test(ua) && !/Chrome|CriOS|FxiOS|EdgiOS/.test(ua);
+            return isIOS && isSafari;
+        }
+
         function viewerUrlForPage(page) {
             const safe = Number.isFinite(page) && page > 0 ? page : 1;
+
+            if (isIOSafari()) {
+                const u = new URL(pdfUrl);
+                u.hash = `page=${safe}`;
+                return u.toString();
+            }
+
             const u = new URL(viewerBase);
             u.searchParams.set("v", VIEWER_VERSION);
             u.searchParams.set("file", pdfUrl);
