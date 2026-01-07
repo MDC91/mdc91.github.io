@@ -368,7 +368,6 @@
         const VIEWER_VERSION = "2025-12-29";
 
         const STORAGE_KEY = "adi_last_page_v1";
-
         const iframe = document.getElementById("reader");
 
         let TOC = [];
@@ -382,8 +381,21 @@
             return u.toString();
         }
 
+        function isIOSSafari() {
+            const ua = navigator.userAgent;
+            const isIOS = /iPad|iPhone|iPod/.test(ua);
+            const isSafari = /Safari/.test(ua) && !/Chrome|CriOS|FxiOS|EdgiOS/.test(ua);
+            return isIOS && isSafari;
+        }
+
+        function nativePdfUrlForPage(page) {
+            const safe = Number.isFinite(page) && page > 0 ? page : 1;
+            return pdfUrl + "#page=" + safe;
+        }
+
         function openPage(page) {
-            iframe.src = viewerUrlForPage(page);
+            const safe = Number.isFinite(page) && page > 0 ? page : 1;
+            iframe.src = isIOSSafari() ? nativePdfUrlForPage(safe) : viewerUrlForPage(safe);
         }
 
         function setHash(params) {
@@ -413,6 +425,7 @@
             const last = getLastPage();
             openPage(last > 0 ? last : 1);
         }
+
 
         // Drawer UI
         const overlay = document.getElementById("overlay");
