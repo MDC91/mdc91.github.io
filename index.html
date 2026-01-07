@@ -310,6 +310,71 @@
                 max-width: 220px;
             }
         }
+
+        .ios-fallback {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 24px;
+        }
+
+        .ios-fallback.active {
+            display: flex;
+        }
+
+        .ios-fallback-content {
+            background: rgba(18, 20, 26, .86);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .ios-fallback-content strong {
+            display: block;
+            font-size: 18px;
+            color: #fff;
+        }
+
+        .ios-fallback p {
+            color: #fff;
+            margin: 12px 0 16px;
+            font-size: 14px;
+        }
+
+        .download-btn {
+            display: inline-block;
+            background: rgba(255,255,255,.06);
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 12px;
+            text-decoration: none;
+            border: 1px solid var(--border);
+        }
+
+        .download-btn:hover {
+            background: rgba(255,255,255,.10);
+            border-color: var(--border2);
+        }
+
+        .dismiss-btn {
+            display: block;
+            margin: 12px auto 0;
+            background: transparent;
+            border: none;
+            color: rgba(255,255,255,.6);
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .dismiss-btn:hover {
+            color: rgba(255,255,255,.8);
+        }
     </style>
 </head>
 <body>
@@ -356,6 +421,15 @@
         </div>
     </div>
 
+    <div id="ios-fallback" class="ios-fallback">
+        <div class="ios-fallback-content">
+            <div><strong>Download required</strong></div>
+            <p>Due to browser limitations, please download the PDF to read on iOS Safari.</p>
+            <a class="download-btn" href="download.html">Download PDF</a>
+            <button class="dismiss-btn" id="dismissFallback">Continue anyway</button>
+        </div>
+    </div>
+
     <!-- GoatCounter -->
     <script data-goatcounter="https://mdc91.goatcounter.com/count"
             async src="//gc.zgo.at/count.js"></script>
@@ -369,6 +443,7 @@
 
         const STORAGE_KEY = "adi_last_page_v1";
         const iframe = document.getElementById("reader");
+        const iosFallback = document.getElementById("ios-fallback");
 
         let TOC = [];
 
@@ -377,6 +452,13 @@
             const isIOS = /iPad|iPhone|iPod/.test(ua) || (ua.includes('Mac') && navigator.maxTouchPoints > 0);
             const isSafari = /Safari/.test(ua) && !/Chrome|CriOS|FxiOS|EdgiOS/.test(ua);
             return isIOS && isSafari;
+        }
+
+        if (isIOSafari()) {
+            iosFallback.classList.add("active");
+            document.getElementById("dismissFallback").addEventListener("click", () => {
+                iosFallback.classList.remove("active");
+            });
         }
 
         function viewerUrlForPage(page) {
