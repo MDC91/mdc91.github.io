@@ -381,21 +381,9 @@
             return u.toString();
         }
 
-        function isIOSSafari() {
-            const ua = navigator.userAgent;
-            const isIOS = /iPad|iPhone|iPod/.test(ua);
-            const isSafari = /Safari/.test(ua) && !/Chrome|CriOS|FxiOS|EdgiOS/.test(ua);
-            return isIOS && isSafari;
-        }
-
-        function nativePdfUrlForPage(page) {
-            const safe = Number.isFinite(page) && page > 0 ? page : 1;
-            return pdfUrl + "#page=" + safe;
-        }
-
         function openPage(page) {
             const safe = Number.isFinite(page) && page > 0 ? page : 1;
-            iframe.src = isIOSSafari() ? nativePdfUrlForPage(safe) : viewerUrlForPage(safe);
+            iframe.src = viewerUrlForPage(safe);
         }
 
         function setHash(params) {
