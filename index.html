@@ -434,8 +434,8 @@
         const renderedPages = new Set();
         const pageElements = new Map();
 
-        // Initialize PDF.js with worker
-        pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('./pdfjs/build/pdf.worker.mjs', window.location.href).href;
+        // Initialize PDF.js without worker for maximum compatibility
+        pdfjsLib.GlobalWorkerOptions.workerSrc = null;
 
         // Create placeholder elements for all pages
         function createPagePlaceholder(pageNum) {
