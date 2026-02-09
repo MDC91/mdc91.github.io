@@ -243,7 +243,8 @@
     // - https://username.github.io/repo/
     const baseUrl = new URL("./", window.location.href);         // ends with trailing slash
 
-    const pdfUrl  = new URL("the-age-of-decentralized-intelligence.pdf", baseUrl).href;
+    // Keep the PDF name simple (recommended): "essay.pdf" in repo root
+    const pdfUrl  = new URL("essay.pdf", baseUrl).href;
 
     // PDF.js viewer shipped in /pdfjs/web/viewer.html
     const viewerUrlBase = new URL("pdfjs/web/viewer.html", baseUrl).href;

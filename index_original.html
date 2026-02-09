@@ -1,0 +1,647 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+    <title>The Age of Decentralized Intelligence</title>
+    <meta name="description" content="Read online or download the PDF." />
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32">
+    <link rel="apple-touch-icon" href="/favicon-180.png" sizes="180x180">
+
+    <link rel="canonical" href="https://age-of-decentralized-intelligence.org/">
+
+    <meta property="og:title" content="The Age of Decentralized Intelligence">
+    <meta property="og:description" content="Read the essay online (ebook-style) or download the PDF.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://age-of-decentralized-intelligence.org/">
+    <meta property="og:site_name" content="The Age of Decentralized Intelligence">
+    <meta property="og:locale" content="en_US">
+    <meta property="og:image" content="https://age-of-decentralized-intelligence.org/social_card.png">
+    <meta property="og:image:secure_url" content="https://age-of-decentralized-intelligence.org/social_card.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="The Age of Decentralized Intelligence - Cover artwork">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@mdc_qubican">
+    <meta name="twitter:title" content="The Age of Decentralized Intelligence">
+    <meta name="twitter:description" content="Read the essay online (ebook-style) or download the PDF.">
+    <meta name="twitter:image" content="https://age-of-decentralized-intelligence.org/social_card.png">
+    <meta name="twitter:image:alt" content="The Age of Decentralized Intelligence - Cover artwork">
+    <style>
+        :root {
+            --bg: #0b0c0f;
+            --panel: rgba(18, 20, 26, .86);
+            --text: #e9e9ee;
+            --muted: rgba(233,233,238,.65);
+            --border: rgba(255,255,255,.10);
+            --border2: rgba(255,255,255,.14);
+            --shadow: 0 18px 60px rgba(0,0,0,.55);
+            --radius: 16px;
+            --btn: rgba(255,255,255,.06);
+            --btnHover: rgba(255,255,255,.10);
+            --focus: rgba(255,255,255,.22);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+        }
+
+        /* PDF Viewer Container */
+        #pdf-container {
+            position: fixed;
+            inset: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+            background: var(--bg);
+            padding: 24px 16px;
+        }
+
+        .pdf-page {
+            margin: 18px auto;
+            max-width: 980px;
+            background: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 14px 50px rgba(0,0,0,.55);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .pdf-page canvas {
+            display: block;
+            max-width: 100%;
+            height: auto;
+        }
+
+        .pdf-page-placeholder {
+            margin: 18px auto;
+            max-width: 980px;
+            height: 60vh;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--muted);
+        }
+
+        @media (max-width: 640px) {
+            #pdf-container {
+                padding: 10px 8px;
+            }
+
+            .pdf-page {
+                margin: 10px auto;
+                border-radius: 8px;
+            }
+        }
+
+        .menu-btn {
+            position: fixed;
+            top: 14px;
+            left: 14px;
+            z-index: 50;
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            background: rgba(18, 20, 26, .55);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 10px 40px rgba(0,0,0,.45);
+            display: grid;
+            place-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+
+            .menu-btn:hover {
+                background: rgba(18, 20, 26, .70);
+                border-color: var(--border2);
+            }
+
+            .menu-btn:active {
+                transform: translateY(1px);
+            }
+
+        .menu-icon {
+            width: 18px;
+            height: 12px;
+            position: relative;
+        }
+
+            .menu-icon span {
+                position: absolute;
+                left: 0;
+                right: 0;
+                height: 2px;
+                border-radius: 2px;
+                background: rgba(233,233,238,.88);
+            }
+
+                .menu-icon span:nth-child(1) {
+                    top: 0;
+                }
+
+                .menu-icon span:nth-child(2) {
+                    top: 5px;
+                    opacity: .85;
+                }
+
+                .menu-icon span:nth-child(3) {
+                    top: 10px;
+                    opacity: .75;
+                }
+
+        .overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 60;
+            background: rgba(0,0,0,.55);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .15s ease;
+        }
+
+            .overlay.open {
+                opacity: 1;
+                pointer-events: auto;
+            }
+
+        .drawer {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            width: min(92vw, 440px);
+            background: var(--panel);
+            backdrop-filter: blur(18px);
+            border-right: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            padding: 14px;
+            transform: translateX(-10px);
+        }
+
+        .drawer-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 10px 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: rgba(0,0,0,.20);
+        }
+
+        .drawer-title {
+            min-width: 0;
+        }
+
+            .drawer-title strong {
+                display: block;
+                font-size: 14px;
+                letter-spacing: .25px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: 280px;
+            }
+
+            .drawer-title span {
+                display: block;
+                margin-top: 4px;
+                font-size: 12px;
+                color: var(--muted);
+            }
+
+        .close-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            background: var(--btn);
+            display: grid;
+            place-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+
+            .close-btn:hover {
+                background: var(--btnHover);
+                border-color: var(--border2);
+            }
+
+            .close-btn:active {
+                transform: translateY(1px);
+            }
+
+        .close-x {
+            font-size: 18px;
+            line-height: 1;
+            color: rgba(233,233,238,.88);
+            transform: translateY(-1px);
+        }
+
+        .actions {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin: 12px 0;
+        }
+
+        .action {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 12px 12px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            background: rgba(0,0,0,.18);
+            text-decoration: none;
+            color: var(--text);
+        }
+
+            .action:hover {
+                border-color: var(--border2);
+                background: rgba(0,0,0,.26);
+            }
+
+            .action small {
+                color: var(--muted);
+                font-size: 12px;
+                display: block;
+                margin-top: 3px;
+            }
+
+            .action .right {
+                color: rgba(233,233,238,.70);
+                font-size: 12px;
+                white-space: nowrap;
+            }
+
+        .toc-wrap {
+            margin-top: 10px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            background: rgba(0,0,0,.18);
+        }
+
+        .toc-head {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+            .toc-head strong {
+                font-size: 12px;
+                letter-spacing: .12em;
+                text-transform: uppercase;
+                color: rgba(233,233,238,.78);
+            }
+
+        .toc {
+            max-height: calc(100vh - 240px);
+            overflow: auto;
+            padding: 6px;
+        }
+
+            .toc a {
+                display: block;
+                padding: 11px 10px;
+                border-radius: 12px;
+                text-decoration: none;
+                color: var(--text);
+                border: 1px solid transparent;
+            }
+
+                .toc a:hover {
+                    background: rgba(255,255,255,.06);
+                    border-color: rgba(255,255,255,.08);
+                }
+
+                .toc a:focus {
+                    outline: none;
+                    border-color: var(--focus);
+                }
+
+        @media (max-width: 420px) {
+            .menu-btn {
+                top: 10px;
+                left: 10px;
+            }
+
+            .drawer {
+                width: min(92vw, 420px);
+            }
+
+            .drawer-title strong {
+                max-width: 220px;
+            }
+        }
+
+        .loading-indicator {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--muted);
+            font-size: 14px;
+            z-index: 10;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="pdf-container">
+        <div class="loading-indicator" id="loading">Loading PDF...</div>
+    </div>
+
+    <button class="menu-btn" id="menuBtn" aria-label="Open menu" title="Menu">
+        <div class="menu-icon" aria-hidden="true">
+            <span></span><span></span><span></span>
+        </div>
+    </button>
+
+    <div class="overlay" id="overlay" aria-hidden="true">
+        <div class="drawer" role="dialog" aria-modal="true" aria-label="Menu">
+            <div class="drawer-header">
+                <div class="drawer-title">
+                    <strong>The Age of Decentralized Intelligence</strong>
+                    <span>Read online or download</span>
+                </div>
+                <button class="close-btn" id="closeBtn" aria-label="Close menu" title="Close">
+                    <div class="close-x" aria-hidden="true">×</div>
+                </button>
+            </div>
+
+            <div class="actions">
+                <a class="action"
+                   id="downloadLink"
+                   href="download.html"
+                   data-goatcounter-click="download-click">
+                    <div>
+                        <div><strong>Download PDF</strong></div>
+                    </div>
+                    <div class="right">↘</div>
+                </a>
+            </div>
+
+            <div class="toc-wrap">
+                <div class="toc-head">
+                    <strong>Contents</strong>
+                    <span style="color:var(--muted); font-size:12px;">Tap to jump</span>
+                </div>
+                <div class="toc" id="toc">Loading…</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- GoatCounter -->
+    <script data-goatcounter="https://mdc91.goatcounter.com/count"
+            async src="//gc.zgo.at/count.js"></script>
+
+    <!-- PDF.js -->
+    <script src="pdfjs/build/pdf.mjs" type="module"></script>
+
+    <script type="module">
+        import * as pdfjsLib from './pdfjs/build/pdf.mjs';
+
+        const SITE_ROOT = window.location.origin + "/";
+        const pdfUrl = SITE_ROOT + "the-age-of-decentralized-intelligence.pdf";
+        const STORAGE_KEY = "adi_last_page_v1";
+        const RENDER_DELAY = 100;
+
+        let pdfDocument = null;
+        let currentPage = 1;
+        let TOC = [];
+        const renderedPages = new Set();
+        const pageElements = new Map();
+
+        // Initialize PDF.js
+        pdfjsLib.GlobalWorkerOptions.workerSrc = './pdfjs/build/pdf.worker.mjs';
+
+        // Create placeholder elements for all pages
+        function createPagePlaceholder(pageNum) {
+            const div = document.createElement('div');
+            div.className = 'pdf-page-placeholder';
+            div.id = `page-${pageNum}`;
+            div.dataset.pageNum = pageNum;
+            div.innerHTML = `<span>Page ${pageNum}</span>`;
+            return div;
+        }
+
+        // Render a single page
+        async function renderPage(pageNum) {
+            if (renderedPages.has(pageNum) || !pdfDocument) return;
+
+            const page = await pdfDocument.getPage(pageNum);
+            const container = document.getElementById('pdf-container');
+            const placeholder = document.getElementById(`page-${pageNum}`);
+
+            if (!placeholder) return;
+
+            // Calculate scale to fit width
+            const maxWidth = Math.min(container.clientWidth - 32, 980);
+            const viewport = page.getViewport({ scale: 1 });
+            const scale = maxWidth / viewport.width;
+            const scaledViewport = page.getViewport({ scale });
+
+            // Create canvas
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.width = scaledViewport.width;
+            canvas.height = scaledViewport.height;
+
+            // Replace placeholder with actual page
+            const pageDiv = document.createElement('div');
+            pageDiv.className = 'pdf-page';
+            pageDiv.id = `page-${pageNum}`;
+            pageDiv.dataset.pageNum = pageNum;
+            pageDiv.appendChild(canvas);
+
+            placeholder.replaceWith(pageDiv);
+            pageElements.set(pageNum, pageDiv);
+
+            // Render PDF page to canvas
+            await page.render({
+                canvasContext: context,
+                viewport: scaledViewport
+            }).promise;
+
+            renderedPages.add(pageNum);
+        }
+
+        // Intersection Observer for lazy loading
+        const observerOptions = {
+            root: document.getElementById('pdf-container'),
+            rootMargin: '100px',
+            threshold: 0.1
+        };
+
+        const pageObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const pageNum = parseInt(entry.target.dataset.pageNum);
+                    setTimeout(() => renderPage(pageNum), RENDER_DELAY);
+                }
+            });
+        }, observerOptions);
+
+        // Track visible page for storage
+        const visibilityObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && entry.intersectionRatio > 0.5) {
+                    const pageNum = parseInt(entry.target.dataset.pageNum);
+                    if (pageNum !== currentPage) {
+                        currentPage = pageNum;
+                        localStorage.setItem(STORAGE_KEY, String(pageNum));
+                    }
+                }
+            });
+        }, { threshold: 0.5 });
+
+        // Load PDF and create page structure
+        async function loadPDF() {
+            try {
+                pdfDocument = await pdfjsLib.getDocument(pdfUrl).promise;
+                const container = document.getElementById('pdf-container');
+                const loading = document.getElementById('loading');
+
+                // Remove loading indicator
+                loading.remove();
+
+                // Create placeholders for all pages
+                for (let i = 1; i <= pdfDocument.numPages; i++) {
+                    const placeholder = createPagePlaceholder(i);
+                    container.appendChild(placeholder);
+                    pageObserver.observe(placeholder);
+                    visibilityObserver.observe(placeholder);
+                }
+
+                // Render initial pages
+                for (let i = 1; i <= Math.min(3, pdfDocument.numPages); i++) {
+                    await renderPage(i);
+                }
+
+                // Jump to saved or requested page
+                resolveFromHash();
+
+            } catch (error) {
+                console.error('Error loading PDF:', error);
+                document.getElementById('loading').textContent = 'Error loading PDF. Please try downloading instead.';
+            }
+        }
+
+        // Navigation functions
+        function scrollToPage(pageNum) {
+            const element = document.getElementById(`page-${pageNum}`);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                renderPage(pageNum);
+            }
+        }
+
+        function setHash(params) {
+            const sp = new URLSearchParams(params);
+            window.location.hash = sp.toString();
+        }
+
+        function getLastPage() {
+            const n = Number(localStorage.getItem(STORAGE_KEY) || "0");
+            return Number.isFinite(n) && n > 0 ? n : 1;
+        }
+
+        function resolveFromHash() {
+            const raw = (window.location.hash || "").replace(/^#/, "");
+            const sp = new URLSearchParams(raw);
+
+            const chapter = sp.get("chapter");
+            const pageStr = sp.get("page");
+
+            if (chapter && TOC.length) {
+                const hit = TOC.find(x => String(x.id).toLowerCase() === String(chapter).toLowerCase());
+                if (hit?.page) {
+                    scrollToPage(Number(hit.page));
+                    return;
+                }
+            }
+
+            if (pageStr && /^\d+$/.test(pageStr)) {
+                scrollToPage(Number(pageStr));
+            } else {
+                const last = getLastPage();
+                scrollToPage(last);
+            }
+        }
+
+        // Drawer UI
+        const overlay = document.getElementById("overlay");
+        const menuBtn = document.getElementById("menuBtn");
+        const closeBtn = document.getElementById("closeBtn");
+
+        function openMenu() {
+            overlay.classList.add("open");
+            overlay.setAttribute("aria-hidden", "false");
+        }
+
+        function closeMenu() {
+            overlay.classList.remove("open");
+            overlay.setAttribute("aria-hidden", "true");
+        }
+
+        menuBtn.addEventListener("click", () => openMenu());
+        closeBtn.addEventListener("click", () => closeMenu());
+        overlay.addEventListener("click", (e) => { if (e.target === overlay) closeMenu(); });
+        window.addEventListener("keydown", (e) => { if (e.key === "Escape") closeMenu(); });
+
+        // Load TOC
+        async function loadToc() {
+            try {
+                TOC = await fetch(SITE_ROOT + "toc.json").then(r => r.json());
+                const tocEl = document.getElementById("toc");
+                tocEl.innerHTML = "";
+
+                TOC.forEach(item => {
+                    const a = document.createElement("a");
+                    a.href = "#chapter=" + encodeURIComponent(item.id);
+                    a.textContent = item.title;
+                    a.addEventListener("click", (e) => {
+                        e.preventDefault();
+                        setHash({ chapter: item.id });
+                        closeMenu();
+                    });
+                    tocEl.appendChild(a);
+                });
+            } catch {
+                document.getElementById("toc").textContent = "Failed to load TOC.";
+            }
+        }
+
+        // Initialize
+        loadToc();
+        loadPDF();
+
+        window.addEventListener("hashchange", resolveFromHash);
+    </script>
+</body>
+</html>
