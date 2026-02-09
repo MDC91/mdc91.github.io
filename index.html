@@ -519,13 +519,26 @@
 
         // Load PDF and create page structure
         async function loadPDF() {
+            const loadingEl = document.getElementById('loading');
+            
             try {
-                pdfDocument = await pdfjsLib.getDocument(pdfUrl).promise;
+                console.log('Starting PDF load from:', pdfUrl);
+                loadingEl.textContent = 'Initializing...';
+                
+                // Load with timeout
+                const loadPromise = pdfjsLib.getDocument(pdfUrl).promise;
+                const timeoutPromise = new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('Loading timeout')), 30000)
+                );
+                
+                pdfDocument = await Promise.race([loadPromise, timeoutPromise]);
+                console.log('PDF loaded, pages:', pdfDocument.numPages);
+                
                 const container = document.getElementById('pdf-container');
-                const loading = document.getElementById('loading');
+                loadingEl.textContent = 'Creating pages...';
 
                 // Remove loading indicator
-                loading.remove();
+                loadingEl.remove();
 
                 // Create placeholders for all pages
                 for (let i = 1; i <= pdfDocument.numPages; i++) {
@@ -545,7 +558,6 @@
 
             } catch (error) {
                 console.error('Error loading PDF:', error);
-                const loadingEl = document.getElementById('loading');
                 loadingEl.innerHTML = `Error loading PDF.<br><small>${error.message}</small><br><a href="download.html" style="color:var(--text); text-decoration:underline;">Try downloading instead</a>`;
             }
         }
