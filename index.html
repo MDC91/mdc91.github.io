@@ -434,8 +434,8 @@
         const renderedPages = new Set();
         const pageElements = new Map();
 
-        // Initialize PDF.js - disable worker for compatibility
-        pdfjsLib.GlobalWorkerOptions.workerSrc = null;
+        // Initialize PDF.js with worker
+        pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('./pdfjs/build/pdf.worker.mjs', window.location.href).href;
 
         // Create placeholder elements for all pages
         function createPagePlaceholder(pageNum) {
@@ -523,16 +523,31 @@
             
             try {
                 console.log('Starting PDF load from:', pdfUrl);
-                loadingEl.textContent = 'Initializing...';
+                loadingEl.textContent = 'Loading PDF file...';
                 
-                // Load with timeout
-                const loadPromise = pdfjsLib.getDocument(pdfUrl).promise;
-                const timeoutPromise = new Promise((_, reject) => 
-                    setTimeout(() => reject(new Error('Loading timeout')), 30000)
-                );
+                // First fetch the PDF as ArrayBuffer for better compatibility
+                const response = await fetch(pdfUrl);
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch PDF: ${response.status} ${response.statusText}`);
+                }
                 
-                pdfDocument = await Promise.race([loadPromise, timeoutPromise]);
-                console.log('PDF loaded, pages:', pdfDocument.numPages);
+                loadingEl.textContent = 'Reading PDF data...';
+                const pdfData = await response.arrayBuffer();
+                
+                loadingEl.textContent = 'Parsing PDF...';
+                // Load PDF from ArrayBuffer
+                const loadingTask = pdfjsLib.getDocument({ data: pdfData });
+                
+                // Add progress tracking
+                loadingTask.onProgress = ({ loaded, total }) => {
+                    if (total) {
+                        const percent = Math.round((loaded / total) * 100);
+                        loadingEl.textContent = `Loading PDF... ${percent}%`;
+                    }
+                };
+                
+                pdfDocument = await loadingTask.promise;
+                console.log('PDF loaded successfully, pages:', pdfDocument.numPages);
                 
                 const container = document.getElementById('pdf-container');
                 loadingEl.textContent = 'Creating pages...';
