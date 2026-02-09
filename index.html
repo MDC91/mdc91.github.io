@@ -420,9 +420,6 @@
     <script data-goatcounter="https://mdc91.goatcounter.com/count"
             async src="//gc.zgo.at/count.js"></script>
 
-    <!-- PDF.js -->
-    <script src="pdfjs/build/pdf.mjs" type="module"></script>
-
     <script type="module">
         import * as pdfjsLib from './pdfjs/build/pdf.mjs';
 
@@ -437,8 +434,8 @@
         const renderedPages = new Set();
         const pageElements = new Map();
 
-        // Initialize PDF.js
-        pdfjsLib.GlobalWorkerOptions.workerSrc = './pdfjs/build/pdf.worker.mjs';
+        // Initialize PDF.js - use absolute path for worker
+        pdfjsLib.GlobalWorkerOptions.workerSrc = SITE_ROOT + 'pdfjs/build/pdf.worker.mjs';
 
         // Create placeholder elements for all pages
         function createPagePlaceholder(pageNum) {
@@ -548,7 +545,8 @@
 
             } catch (error) {
                 console.error('Error loading PDF:', error);
-                document.getElementById('loading').textContent = 'Error loading PDF. Please try downloading instead.';
+                const loadingEl = document.getElementById('loading');
+                loadingEl.innerHTML = `Error loading PDF.<br><small>${error.message}</small><br><a href="download.html" style="color:var(--text); text-decoration:underline;">Try downloading instead</a>`;
             }
         }
 
